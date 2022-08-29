@@ -50,6 +50,7 @@
   import memoizeOne from 'memoize-one'
   import { validateText } from '../../../logic/validation'
 
+  export let foldGutter = true
   export let readOnly = false
   export let mainMenuBar = true
   export let statusBar = true
@@ -456,8 +457,16 @@
     return linter(linterCallback, { delay: TEXT_MODE_ONCHANGE_DELAY })
   }
 
+  function getBaseSetup() {
+    const _basicSetup = [...(basicSetup as Extension[])]
+    if (!foldGutter) {
+      _basicSetup.splice(4, 1)
+    }
+    return _basicSetup
+  } 
+
   function createCodeMirrorView({ target, initialText, readOnly, indentation }) {
-    debug('Create CodeMirror editor', { readOnly, indentation })
+    debug('Create CodeMirror editor', { readOnly, indentation })    
 
     const state = EditorState.create({
       doc: initialText,
@@ -465,7 +474,7 @@
         keymap.of([indentWithTab, formatCompactKeyBinding]),
         linterCompartment.of(createLinter()),
         lintGutter(),
-        basicSetup,
+        getBaseSetup(),
         highlighter,
         EditorView.domEventHandlers({
           dblclick: handleDoubleClick

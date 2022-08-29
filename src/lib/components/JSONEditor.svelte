@@ -47,6 +47,7 @@
 
   export let content: Content = { text: '' }
 
+  export let foldGutter = true
   export let readOnly = false
   export let indentation: number | string = 2
   export let tabSize = 4
@@ -407,6 +408,7 @@
           <TextMode
             bind:this={refTextMode}
             text={getText(content)}
+            {foldGutter}
             {readOnly}
             {indentation}
             {tabSize}
