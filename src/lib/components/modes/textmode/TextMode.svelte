@@ -95,6 +95,7 @@
   export let hasHighlightActiveLine = true
   export let hasLineNumbers = true
   export let hasFoldGutter = true
+  export let hasLintGutter = true
   export let readOnly = false
   export let mainMenuBar = true
   export let statusBar = true
@@ -540,7 +541,7 @@
       extensions: [
         keymap.of([indentWithTab, formatCompactKeyBinding]),
         linterCompartment.of(createLinter()),
-        lintGutter(),
+        hasLintGutter && lintGutter(),
         getBaseSetup(),
         highlighter,
         EditorView.domEventHandlers({
@@ -562,7 +563,7 @@
         tabSizeCompartment.of(EditorState.tabSize.of(tabSize)),
         indentUnitCompartment.of(createIndentUnit(indentation)),
         EditorView.lineWrapping
-      ]
+      ].filter(Boolean)
     })
 
     codeMirrorView = new EditorView({

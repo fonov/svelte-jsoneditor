@@ -50,6 +50,7 @@
   export let hasHighlightActiveLine = true
   export let hasLineNumbers = true
   export let hasFoldGutter = true
+  export let hasLintGutter = true
   export let readOnly = false
   export let indentation: number | string = 2
   export let tabSize = 4
@@ -413,6 +414,7 @@
             {hasHighlightActiveLine}
             {hasLineNumbers}
             {hasFoldGutter}
+            {hasLintGutter}
             {readOnly}
             {indentation}
             {tabSize}
