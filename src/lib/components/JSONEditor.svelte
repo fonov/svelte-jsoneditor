@@ -47,7 +47,9 @@
 
   export let content: Content = { text: '' }
 
-  export let foldGutter = true
+  export let hasHighlightActiveLine = true
+  export let hasLineNumbers = true
+  export let hasFoldGutter = true
   export let readOnly = false
   export let indentation: number | string = 2
   export let tabSize = 4
@@ -408,7 +410,9 @@
           <TextMode
             bind:this={refTextMode}
             text={getText(content)}
-            {foldGutter}
+            {hasHighlightActiveLine}
+            {hasLineNumbers}
+            {hasFoldGutter}
             {readOnly}
             {indentation}
             {tabSize}

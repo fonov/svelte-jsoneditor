@@ -25,15 +25,49 @@
   import Message from '../../controls/Message.svelte'
   import ValidationErrorsOverview from '../../controls/ValidationErrorsOverview.svelte'
   import TextMenu from './menu/TextMenu.svelte'
-  import { basicSetup, EditorView } from 'codemirror'
+  import { EditorView } from 'codemirror'
   import { Compartment, EditorState, type Extension } from '@codemirror/state'
-  import { keymap, ViewUpdate } from '@codemirror/view'
-  import { indentWithTab, redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
+  import {
+    crosshairCursor,
+    drawSelection,
+    dropCursor,
+    highlightActiveLine,
+    highlightActiveLineGutter,
+    highlightSpecialChars,
+    keymap,
+    lineNumbers,
+    rectangularSelection,
+    ViewUpdate
+  } from '@codemirror/view'
+  import {
+    defaultKeymap,
+    history,
+    historyKeymap,
+    indentWithTab,
+    redo,
+    redoDepth,
+    undo,
+    undoDepth
+  } from '@codemirror/commands'
   import type { Diagnostic } from '@codemirror/lint'
-  import { linter, lintGutter } from '@codemirror/lint'
+  import { linter, lintGutter, lintKeymap } from '@codemirror/lint'
   import { json as jsonLang } from '@codemirror/lang-json'
-  import { indentUnit } from '@codemirror/language'
-  import { closeSearchPanel, openSearchPanel, search } from '@codemirror/search'
+  import {
+    bracketMatching,
+    defaultHighlightStyle,
+    foldGutter,
+    foldKeymap,
+    indentOnInput,
+    indentUnit,
+    syntaxHighlighting
+  } from '@codemirror/language'
+  import {
+    closeSearchPanel,
+    highlightSelectionMatches,
+    openSearchPanel,
+    search,
+    searchKeymap
+  } from '@codemirror/search'
   import jsonSourceMap from 'json-source-map'
   import StatusBar from './StatusBar.svelte'
   import { highlighter } from './codemirror/codemirror-theme'
@@ -49,8 +83,18 @@
   import { isContentParseError, isContentValidationErrors } from '../../../typeguards'
   import memoizeOne from 'memoize-one'
   import { validateText } from '../../../logic/validation'
+  import {
+    autocompletion,
+    closeBrackets,
+    closeBracketsKeymap,
+    completionKeymap
+  } from '@codemirror/autocomplete'
 
-  export let foldGutter = true
+  export { EditorView } from '@codemirror/view'
+
+  export let hasHighlightActiveLine = true
+  export let hasLineNumbers = true
+  export let hasFoldGutter = true
   export let readOnly = false
   export let mainMenuBar = true
   export let statusBar = true
@@ -458,15 +502,38 @@
   }
 
   function getBaseSetup() {
-    const _basicSetup = [...(basicSetup as Extension[])]
-    if (!foldGutter) {
-      _basicSetup.splice(4, 1)
-    }
-    return _basicSetup
-  } 
+    return [
+      hasLineNumbers && lineNumbers(),
+      hasHighlightActiveLine && highlightActiveLineGutter(),
+      highlightSpecialChars(),
+      history(),
+      hasFoldGutter && foldGutter(),
+      drawSelection(),
+      dropCursor(),
+      EditorState.allowMultipleSelections.of(true),
+      indentOnInput(),
+      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+      bracketMatching(),
+      closeBrackets(),
+      autocompletion(),
+      rectangularSelection(),
+      crosshairCursor(),
+      highlightActiveLine(),
+      hasHighlightActiveLine && highlightSelectionMatches(),
+      keymap.of([
+        ...closeBracketsKeymap,
+        ...defaultKeymap,
+        ...searchKeymap,
+        ...historyKeymap,
+        ...foldKeymap,
+        ...completionKeymap,
+        ...lintKeymap
+      ])
+    ].filter(Boolean)
+  }
 
   function createCodeMirrorView({ target, initialText, readOnly, indentation }) {
-    debug('Create CodeMirror editor', { readOnly, indentation })    
+    debug('Create CodeMirror editor', { readOnly, indentation })
 
     const state = EditorState.create({
       doc: initialText,
